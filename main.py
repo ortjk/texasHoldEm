@@ -11,4 +11,3 @@ for i in cards.suits:
 
 random.shuffle(deck)
 
-calculations.determine_hand_value(deck[0:5])
