@@ -1,4 +1,6 @@
 import cards
+import calculations
+
 import random
 
 # init deck
@@ -8,3 +10,5 @@ for i in cards.suits:
         deck.append(cards.Card(i, q))
 
 random.shuffle(deck)
+
+calculations.determine_hand_value(deck[0:5])
