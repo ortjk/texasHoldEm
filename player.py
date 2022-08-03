@@ -3,14 +3,14 @@ aspects = ["little blind", "big blind", "dealer"]
 
 class Player:
     def __init__(self, aspect, balance):
-        self.hand = None
+        self.hand = []
         self.folded = False
         self.bet_amount = 0
         self.aspect = aspect
         self.balance = balance
 
     def deal_cards(self, cards):
-        self.hand = cards
+        self.hand += cards
 
     def set_aspect(self, aspect):
         self.aspect = aspect
@@ -24,4 +24,6 @@ class Player:
         self.bet_amount = 0
         self.folded = True
 
+    def win(self, amount):
+        self.balance += amount
 

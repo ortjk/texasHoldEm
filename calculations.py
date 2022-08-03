@@ -58,7 +58,6 @@ def determine_hand_value(hand: list) -> int:
 
         for i in range(0, len(hand)):
             # straight check section
-            print(f"current card is {s_hand_ranks[i][0]} and current streak is {streak}")
             if streak == 4:
                 # within hand_counts, only the highest card of the straight is stored
                 hand_counts["straight"] = [s_hand_ranks[i][0]]
@@ -71,13 +70,11 @@ def determine_hand_value(hand: list) -> int:
             # if current card is two and an ace exists
             if (i < len(hand) - 1) and (s_hand_ranks[i][0] == 1) and (s_hand_ranks[-1][0] == 13):
                 streak += 1
-                print(f"current card is {s_hand_ranks[i][0]} and current streak is {streak}")
                 if not (s_hand_ranks[i][1] == s_hand_ranks[i + 1][1]):
                     suit_match = False
             # checks if the next highest card is one larger
             if (i < len(hand) - 1) and (s_hand_ranks[i][0] + 1 == s_hand_ranks[i + 1][0]):
                 streak += 1
-                print(f"current card is {s_hand_ranks[i][0]} and current streak is {streak}")
                 if not (s_hand_ranks[i][1] == s_hand_ranks[i + 1][1]):
                     suit_match = False
             else:

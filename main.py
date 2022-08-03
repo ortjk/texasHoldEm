@@ -1,12 +1,6 @@
 import cards
-import player
-import calculations
 import pygame
 
-# init deck
-deck = cards.reset_deck()
-
-pot = 0
 phase = 0
 current_player = 0
 
@@ -19,67 +13,104 @@ while running:
             running = False
 
     if phase == 0:
-        # placeholder for selecting starting amounts
-        stack = 1000
-        little_blind = 5
-        num_players = 4
-
-        # init players
-        players = []
-        for i in range(0, num_players):
-            if i <= 1:
-                players.append(player.Player(player.aspects[i], stack))
-            else:
-                players.append(player.Player(None, stack))
-        players.append(player.Player(player.aspects[2], stack))
-
+        game_state = cards.GameState(1000, 5, 4)
         phase += 1
 
     # EVENTS
     # Start of game
     elif phase == 1:
         # Little Blind
-        if players[current_player].aspect == "little blind":
-            players[current_player].bet(0 - little_blind)
+        if game_state.players[current_player].aspect == "little blind":
+            game_state.add_bet(game_state.little_blind, current_player)
             current_player += 1
         # big blind
-        elif players[current_player].aspect == "big blind":
-            players[current_player].bet(0 - little_blind * 2)
+        elif game_state.players[current_player].aspect == "big blind":
+            game_state.add_bet(game_state.little_blind * 2, current_player)
             current_player += 1
         # Match Bets until dealer does
-        elif players[current_player].aspect == "dealer":
-            players[current_player].bet(0 - little_blind * 2)
+        elif game_state.players[current_player].aspect == "dealer":
+            game_state.add_bet(game_state.little_blind * 2, current_player)
             current_player = 0
             phase += 1
         else:
-            players[current_player].bet(0 - little_blind * 2)
+            game_state.add_bet(game_state.little_blind * 2, current_player)
             current_player += 1
     # Deal
     elif phase == 2:
-        for i in range(0, num_players):
-            players[i].deal_cards([deck[0], deck[1]])
-            deck.pop(0)
-            deck.pop(0)
+        for i in range(0, game_state.num_players):
+            game_state.deal_to_player(i, 2)
         phase += 1
     # Go around with bets
     elif phase == 3:
-        if current_player == 0:
+        if game_state.players[current_player].aspect == "dealer":
+            game_state.add_bet(50, current_player)
+            phase += 1
+            current_player = 0
+        elif current_player == 0:
             # placeholder for asking player for bet/fold/check
-            players[current_player].bet(50)
+            game_state.add_bet(50, current_player)
+            current_player += 1
         else:
             # placeholder for pausing for 1 sec, determining hand value, and making decision based on that
-            players[current_player].bet(50)
-
-    #
+            game_state.add_bet(50, current_player)
+            current_player += 1
     # Deal the flop (three cards)
+    elif phase == 4:
+        game_state.add_to_river(3)
+        phase += 1
     # Go around with bets
-    #
+    elif phase == 5:
+        if game_state.players[current_player].aspect == "dealer":
+            game_state.add_bet(50, current_player)
+            phase += 1
+            current_player = 0
+        elif current_player == 0:
+            # placeholder for asking player for bet/fold/check
+            game_state.add_bet(50, current_player)
+            current_player += 1
+        else:
+            # placeholder for pausing for 1 sec, determining hand value, and making decision based on that
+            game_state.add_bet(50, current_player)
+            current_player += 1
     # Deal the turn (one card)
+    elif phase == 6:
+        game_state.add_to_river(1)
+        phase += 1
     # Go around with bets
-    #
+    elif phase == 7:
+        if game_state.players[current_player].aspect == "dealer":
+            game_state.add_bet(50, current_player)
+            phase += 1
+            current_player = 0
+        elif current_player == 0:
+            # placeholder for asking player for bet/fold/check
+            game_state.add_bet(50, current_player)
+            current_player += 1
+        else:
+            # placeholder for pausing for 1 sec, determining hand value, and making decision based on that
+            game_state.add_bet(50, current_player)
+            current_player += 1
     # Deal the river (one card)
+    elif phase == 8:
+        game_state.add_to_river(1)
+        phase += 1
     # Go around with bets
-    #
+    elif phase == 9:
+        if game_state.players[current_player].aspect == "dealer":
+            game_state.add_bet(50, current_player)
+            phase += 1
+            current_player = 0
+        elif current_player == 0:
+            # placeholder for asking player for bet/fold/check
+            game_state.add_bet(50, current_player)
+            current_player += 1
+        else:
+            # placeholder for pausing for 1 sec, determining hand value, and making decision based on that
+            game_state.add_bet(50, current_player)
+            current_player += 1
     # Determine winner and distribute pot
+    elif phase == 10:
+        game_state.determine_winner()
+        running = False
 
 
