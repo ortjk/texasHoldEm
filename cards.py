@@ -1,3 +1,4 @@
+import random
 suits = ["hearts", "diamonds", "spades", "clubs"]
 ranks = {
     "two": 1,
@@ -14,6 +15,17 @@ ranks = {
     "king": 12,
     "ace": 13
 }
+
+
+def reset_deck():
+    deck_ = []
+    for i in suits:
+        for q in ranks:
+            deck_.append(Card(i, q))
+
+    random.shuffle(deck_)
+
+    return deck_
 
 
 class Card:
