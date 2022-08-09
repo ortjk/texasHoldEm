@@ -69,7 +69,6 @@ class GameState:
                 previous_highest[1] = i
 
         previous_highest[1].win(self.pot)
-        print(previous_highest)
 
 
 class Card:
