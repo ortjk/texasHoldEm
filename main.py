@@ -5,13 +5,14 @@ phase = 0
 current_player = 0
 
 pygame.init()
-screen = pygame.display.set_mode((800, 600))
+screen = pygame.display.set_mode((539, 360))
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
+    Table_img = pygame.image.load('images/PokerTable.jpg')
+    screen.blit(Table_img, [0, 0])
     if phase == 0:
         game_state = cards.GameState(1000, 5, 4)
         phase += 1
@@ -111,6 +112,6 @@ while running:
     # Determine winner and distribute pot
     elif phase == 10:
         game_state.determine_winner()
-        running = False
+        #running = False
 
 
