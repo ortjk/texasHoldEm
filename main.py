@@ -1,11 +1,14 @@
 import cards
 import pygame
+import element
 
 phase = 0
 current_player = 0
+static_sprites = pygame.sprite.Group()
+dynamic_sprites = pygame.sprite.Group()
 
 pygame.init()
-screen = pygame.display.set_mode((800, 600))
+screen = pygame.display.set_mode((1280, 720))
 running = True
 while running:
     for event in pygame.event.get():
@@ -13,6 +16,9 @@ while running:
             running = False
 
     if phase == 0:
+        new_sprite = element.UiElement("images/1.png", 0, 0, 100, 100)
+        static_sprites.add(new_sprite.e_sprite)
+
         game_state = cards.GameState(1000, 5, 4)
         phase += 1
 
@@ -32,6 +38,7 @@ while running:
             game_state.add_bet(game_state.little_blind * 2, current_player)
             current_player = 0
             phase += 1
+        # normal player
         else:
             game_state.add_bet(game_state.little_blind * 2, current_player)
             current_player += 1
@@ -111,6 +118,13 @@ while running:
     # Determine winner and distribute pot
     elif phase == 10:
         game_state.determine_winner()
-        running = False
+        # running = False
 
+
+    # draw the sprites to the window
+    static_sprites.draw(screen)
+    dynamic_sprites.draw(screen)
+
+    # update the screen
+    pygame.display.update()
 
