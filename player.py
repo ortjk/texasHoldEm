@@ -1,4 +1,10 @@
 aspects = ["little blind", "big blind", "dealer"]
+btn_id_values = {
+    0: "fold",
+    1: "check",
+    2: "raise",
+    3: "call"
+}
 
 
 class Player:
