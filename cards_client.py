@@ -1,6 +1,6 @@
 import random
 import player
-import calculations
+import calculations_client as calculations
 import socket
 
 suits = ["hearts", "diamonds", "spades", "clubs"]
