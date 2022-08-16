@@ -129,8 +129,6 @@ while running:
     elif phase == 10:
         game_state.determine_winner()
         # running = False
-
-
     # draw the sprites to the window
     static_sprites.draw(screen)
     dynamic_sprites.draw(screen)

@@ -60,6 +60,8 @@ class GameState:
 
     def add_bet(self, amount, player_num):
         self.players[player_num].bet(amount)
+        c.send(bytes(str(amount), 'utf-8'))
+        c.send(bytes(';', 'utf-8'))
         self.pot += amount
 
     def deal_to_player(self, player_num, amount):
