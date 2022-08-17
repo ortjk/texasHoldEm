@@ -84,11 +84,9 @@ while running:
             game_state.add_bet(game_state.little_blind * 2, current_player)
             current_player += 1
         elif game_state.players[current_player].aspect == "dealer":
-            game_state.add_bet(game_state.little_blind, current_player)
             current_player = 0
             phase += 1
         else:
-            game_state.add_bet(game_state.little_blind * 2, current_player)
             current_player += 1
 
     elif phase == 4:

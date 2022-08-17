@@ -14,6 +14,7 @@ class Player:
         self.bet_amount = 0
         self.aspect = aspect
         self.balance = balance
+        self.previous_bet = 0
 
     def deal_cards(self, cards):
         self.hand += cards
@@ -24,6 +25,7 @@ class Player:
     def bet(self, amount):
         self.bet_amount += amount
         self.balance -= amount
+        self.previous_bet = amount
 
     def fold(self):
         self.hand = None

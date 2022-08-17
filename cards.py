@@ -70,7 +70,7 @@ class GameState:
         elif option_num == 1:
             self.add_bet(self.current_highest_bet - self.players[player_num].bet_amount, player_num)
         elif option_num == 2:
-            self.add_bet(amount + self.current_highest_bet, player_num)
+            self.add_bet(amount + self.current_highest_bet - self.players[player_num].bet_amount, player_num)
         else:
             print("invalid option number")
 
