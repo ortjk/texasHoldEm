@@ -27,8 +27,7 @@ c = socket.socket()
 c.bind((host, port))
 c.listen(1)
 s, addr = c.accept()
-#s.settimeout(0.000001)  # prevents game lag
-
+s.settimeout(0.000001)  # prevents game lag
 def ReturnHand(hand: list):
     for i in hand:
         s.send(bytes(i.rank, 'utf-8'))
@@ -38,13 +37,14 @@ def ReturnHand(hand: list):
         print(i.rank, i.suit)
 
 while running:
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
     if phase == 0:
         new_sprite = element.UiElement("images/1.png", 0, 0, 100, 100)
-        static_sprites.add(new_sprite.e_sprite)
+        static_sprites.add(new_sprite.sprite)
 
         game_state = cards.GameState(1000, 5, 2)
         phase += 1
@@ -151,7 +151,23 @@ while running:
         game_state.determine_winner()
         # running = False
 
-
+    # adds player 2's bet to the pot, trys to receive data, if there is no data at the time it passes
+    try:
+        data = s.recv(1024)
+        data = str(data, 'utf-8')
+        data = data.split(";")
+        sub = 0
+        for i in range(len(data)):
+            if (data[i-sub] == ''):
+                data.pop(i-sub)
+                sub += 1
+                continue
+            data[i-sub] = int(data[i-sub])
+        data = sum(data)
+        # add's the player 2 bet's
+        game_state.add_bet(data, current_player + 1)
+    except:
+        pass
     # draw the sprites to the window
     static_sprites.draw(screen)
     dynamic_sprites.draw(screen)
