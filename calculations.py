@@ -1,5 +1,5 @@
 import cards
-
+import random as r
 
 # function takes in a hand and returns an int equal to how good the hand is
 # the order of value for hands is:
@@ -111,3 +111,42 @@ def determine_hand_value(hand: list) -> int:
         hundreds -= 100
 
     return 0
+
+
+def determine_move(hand, river_size, call_amount) -> list:
+    v = determine_hand_value(hand)
+    multiplier = r.randint(0, 15) / 13
+    if river_size == 0:
+        if v >= 10:
+            return [2, 50]
+        else:
+            return [1, 0]
+    elif river_size == 3:
+        max_raise = int(10 * multiplier * v)
+        a = max_raise - call_amount
+        if a <= -150:
+            return [0, 0]
+        elif a <= 150:
+            return [1, 0]
+        else:
+            return [2, a]
+    elif river_size == 4:
+        max_raise = int(10 * multiplier * v)
+        a = max_raise - call_amount
+        if a <= -150:
+            return [0, 0]
+        elif a <= 150:
+            return [1, 0]
+        else:
+            return [2, a]
+    else:
+        max_raise = int(10 * multiplier * v)
+        a = max_raise - call_amount
+        if a <= -150:
+            return [0, 0]
+        elif a <= 150:
+            return [1, 0]
+        else:
+            return [2, a]
+
+

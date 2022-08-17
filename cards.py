@@ -53,24 +53,38 @@ class GameState:
             self.deck.pop(0)
 
     def add_bet(self, amount, player_num):
-        self.players[player_num].bet(amount)
-        self.pot += amount
+        if amount <= self.players[player_num].balance:
+            self.players[player_num].bet(amount)
+            self.pot += amount
 
-        if self.current_highest_bet < self.players[player_num].bet_amount:
-            self.current_highest_bet = self.players[player_num].bet_amount
+            if self.current_highest_bet < self.players[player_num].bet_amount:
+                self.current_highest_bet = self.players[player_num].bet_amount
+
+        else:
+            amount = self.players[player_num].balance
+            if amount == 0:
+                self.players[player_num].fold()
+            self.players[player_num].bet(amount)
+            self.pot += amount
+
+            if self.current_highest_bet < self.players[player_num].bet_amount:
+                self.current_highest_bet = self.players[player_num].bet_amount
 
     def deal_to_player(self, player_num, amount):
         for i in range(0, amount):
             self.players[player_num].deal_cards([self.deck[0]])
             self.deck.pop(0)
 
+    def get_call_amount(self, player_num):
+        return self.current_highest_bet - self.players[player_num].bet_amount
+
     def select_player_option(self, player_num, option_num, amount=50):
         if option_num == 0:
             self.players[player_num].fold()
         elif option_num == 1:
-            self.add_bet(self.current_highest_bet - self.players[player_num].bet_amount, player_num)
+            self.add_bet(self.get_call_amount(player_num), player_num)
         elif option_num == 2:
-            self.add_bet(amount + self.current_highest_bet - self.players[player_num].bet_amount, player_num)
+            self.add_bet(amount + self.get_call_amount(player_num), player_num)
         else:
             print("invalid option number")
 

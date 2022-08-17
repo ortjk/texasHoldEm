@@ -28,7 +28,7 @@ class Player:
         self.previous_bet = amount
 
     def fold(self):
-        self.hand = None
+        self.hand = []
         self.bet_amount = 0
         self.folded = True
 

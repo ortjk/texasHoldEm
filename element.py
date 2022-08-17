@@ -51,10 +51,10 @@ def create_num_player_buttons():
     for i in range(0, 8):
         if i <= 3:
             x = retrieve_from_ss("images/PlayerNumbers.png", 59 * i + 26, 8, 52, 73)
-            num_players_btn = ButtonFromImage(x, 86 * i + 500, 180, 52, 73, i)
+            num_players_btn = ButtonFromImage(x, 86 * i + 490, 270, 52, 73, i)
         else:
             x = retrieve_from_ss("images/PlayerNumbers.png", 59 * (i - 4) + 26, 88, 52, 73)
-            num_players_btn = ButtonFromImage(x, 86 * (i - 4) + 500, 264, 52, 73, i)
+            num_players_btn = ButtonFromImage(x, 86 * (i - 4) + 490, 354, 52, 73, i)
         elems.append(num_players_btn)
     return elems
 
