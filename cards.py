@@ -49,7 +49,7 @@ class GameState:
 
     def add_to_river(self, amount):
         self.river += list(self.deck[0:amount])
-        for i in range(0, amount):
+        for i in range(0, amount + 1):
             self.deck.pop(0)
 
     def add_bet(self, amount, player_num):
@@ -64,28 +64,36 @@ class GameState:
             self.players[player_num].deal_cards([self.deck[0]])
             self.deck.pop(0)
 
-    def select_player_option(self, player_num, option_num, amount=0):
+    def select_player_option(self, player_num, option_num, amount=50):
         if option_num == 0:
             self.players[player_num].fold()
         elif option_num == 1:
-            # add code to see if check is valid
-            print("check")
-        elif option_num == 2:
-            self.add_bet(amount, player_num)
-        elif option_num == 3:
             self.add_bet(self.current_highest_bet - self.players[player_num].bet_amount, player_num)
+        elif option_num == 2:
+            self.add_bet(amount + self.current_highest_bet, player_num)
         else:
             print("invalid option number")
 
     def determine_winner(self):
         previous_highest = [0, None]
         for i in self.players:
-            q = calculations.determine_hand_value(i.hand + self.river)
-            if q > previous_highest[0]:
-                previous_highest[0] = q
-                previous_highest[1] = i
+            if not i.folded:
+                q = calculations.determine_hand_value(i.hand + self.river)
+                if q > previous_highest[0]:
+                    previous_highest[0] = q
+                    previous_highest[1] = i
 
         previous_highest[1].win(self.pot)
+        print(f"Player {previous_highest[1]} wins a pot of value ${self.pot} with a score of {previous_highest[0]}")
+
+    def new_round_reset(self):
+        self.pot = 0
+        self.current_highest_bet = 0
+        self.deck = reset_deck()
+        self.river = []
+
+        for i in self.players:
+            i.new_round_reset()
 
 
 class Card:

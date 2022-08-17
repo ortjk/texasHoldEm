@@ -33,3 +33,8 @@ class Player:
     def win(self, amount):
         self.balance += amount
 
+    def new_round_reset(self):
+        self.hand = []
+        self.folded = False
+        self.bet_amount = 0
+

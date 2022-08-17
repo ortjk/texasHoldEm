@@ -1,14 +1,24 @@
 import cards
 import pygame
 import element
+import random as r
+
+
+def update_balance_visuals(_static_sprites, _game_state, _num_players):
+    _static_sprites.remove(_static_sprites.sprites()[:-2 - _num_players:-1])
+    for i in element.create_balance_text(_game_state):
+        _static_sprites.add(i.sprite)
+
 
 # initialize
 phase = 0
 current_player = 0
-# 'fonts/CallingCode-Regular.ttf'
+tentative_bet = 0
+
 static_sprites = pygame.sprite.Group()
 dynamic_sprites = pygame.sprite.Group()
 card_sprites = pygame.sprite.Group()
+tentative_bet_text = pygame.sprite.Group()
 dynamic_elements = []
 
 pygame.init()
@@ -57,13 +67,52 @@ while running:
         dynamic_elements = []
 
         # create ui elements
-        for i in element.create_player_icons(game_state.num_players, game_state.players):
+        for i in element.create_player_icons(game_state.num_players):
+            static_sprites.add(i.sprite)
+
+        for i in element.create_balance_text(game_state):
             static_sprites.add(i.sprite)
 
         phase += 1
 
+    # blinds
     elif phase == 3:
-        if current_player == 0:
+        if game_state.players[current_player].aspect == "little blind":
+            game_state.add_bet(game_state.little_blind, current_player)
+            current_player += 1
+        elif game_state.players[current_player].aspect == "big blind":
+            game_state.add_bet(game_state.little_blind * 2, current_player)
+            current_player += 1
+        elif game_state.players[current_player].aspect == "dealer":
+            game_state.add_bet(game_state.little_blind, current_player)
+            current_player = 0
+            phase += 1
+        else:
+            game_state.add_bet(game_state.little_blind * 2, current_player)
+            current_player += 1
+
+    elif phase == 4:
+        # deal cards
+        if current_player < game_state.num_players - 1:
+            game_state.deal_to_player(current_player, 2)
+            for i in element.create_player_cards(game_state.players[current_player].hand, current_player):
+                card_sprites.add(i.sprite)
+            current_player += 1
+        else:
+            game_state.deal_to_player(current_player, 2)
+            for i in element.create_player_cards(game_state.players[current_player].hand, current_player):
+                card_sprites.add(i.sprite)
+            current_player = 0
+            phase += 1
+
+    elif phase == 5:
+        if game_state.players[current_player].folded:
+            if current_player < game_state.num_players - 1:
+                current_player = 0
+                phase += 1
+            else:
+                current_player += 1
+        elif current_player == 0:
             if len(dynamic_elements) == 0:
                 for i in element.create_player_option_buttons():
                     dynamic_elements.append(i)
@@ -71,110 +120,198 @@ while running:
             else:
                 for i in dynamic_elements:
                     if i.tracked_bool:
-                        game_state.select_player_option(current_player, i.id)
+                        if i.id <= 2:
+                            game_state.select_player_option(current_player, i.id, tentative_bet)
+                            current_player += 1
+                            tentative_bet = 0
 
+                            dynamic_elements = []
+                            dynamic_sprites.remove(dynamic_sprites.sprites())
+                        elif i.id == 3:
+                            if game_state.players[current_player].balance > tentative_bet:
+                                tentative_bet += 50
+                            i.tracked_bool = False
+                        elif i.id == 4:
+                            if tentative_bet > 0:
+                                tentative_bet -= 50
+                            i.tracked_bool = False
 
-
-
-    elif phase == 4:
-        # Little Blind
-        if game_state.players[current_player].aspect == "little blind":
-            game_state.add_bet(game_state.little_blind, current_player)
-            current_player += 1
-        # big blind
-        elif game_state.players[current_player].aspect == "big blind":
-            game_state.add_bet(game_state.little_blind * 2, current_player)
-            current_player += 1
-        # Match Bets until dealer does
-        elif game_state.players[current_player].aspect == "dealer":
-            game_state.add_bet(game_state.little_blind * 2, current_player)
-            current_player = 0
-            phase += 1
-        # normal player
-        else:
-            game_state.add_bet(game_state.little_blind * 2, current_player)
-            current_player += 1
-    # Deal
-    elif phase == 3:
-        for i in range(0, game_state.num_players):
-            game_state.deal_to_player(i, 2)
-        phase += 1
-    # Go around with bets
-    elif phase == 4:
-        if game_state.players[current_player].aspect == "dealer":
-            game_state.add_bet(50, current_player)
-            phase += 1
-            current_player = 0
-        elif current_player == 0:
-            # placeholder for asking player for bet/fold/check
-            game_state.add_bet(50, current_player)
+        elif current_player < game_state.num_players - 1:
+            game_state.select_player_option(current_player, 1, 50)
             current_player += 1
         else:
-            # placeholder for pausing for 1 sec, determining hand value, and making decision based on that
-            game_state.add_bet(50, current_player)
-            current_player += 1
-    # Deal the flop (three cards)
-    elif phase == 5:
-        game_state.add_to_river(3)
-        phase += 1
-    # Go around with bets
+            game_state.select_player_option(current_player, 2, 50)
+            current_player = 0
+            phase += 1
+
+        update_balance_visuals(static_sprites, game_state, game_state.num_players)
+        tentative_bet_text.remove(tentative_bet_text.sprites())
+        tentative_bet_text.add(element.TextElement(f"${tentative_bet}", 'fonts/CallingCode-Regular.ttf', 28, 1000, 650).sprite)
+
+
     elif phase == 6:
-        if game_state.players[current_player].aspect == "dealer":
-            game_state.add_bet(50, current_player)
-            phase += 1
-            current_player = 0
-        elif current_player == 0:
-            # placeholder for asking player for bet/fold/check
-            game_state.add_bet(50, current_player)
-            current_player += 1
-        else:
-            # placeholder for pausing for 1 sec, determining hand value, and making decision based on that
-            game_state.add_bet(50, current_player)
-            current_player += 1
-    # Deal the turn (one card)
+        game_state.add_to_river(3)
+        for i in element.create_river_cards(game_state.river, game_state):
+            card_sprites.add(i.sprite)
+        phase += 1
+
     elif phase == 7:
-        game_state.add_to_river(1)
-        phase += 1
-    # Go around with bets
+        if game_state.players[current_player].folded:
+            if current_player < game_state.num_players - 1:
+                current_player = 0
+                phase += 1
+            else:
+                current_player += 1
+        elif current_player == 0:
+            if len(dynamic_elements) == 0:
+                for i in element.create_player_option_buttons():
+                    dynamic_elements.append(i)
+                    dynamic_sprites.add(i.sprite)
+            else:
+                for i in dynamic_elements:
+                    if i.tracked_bool:
+                        if i.id <= 2:
+                            game_state.select_player_option(current_player, i.id, tentative_bet)
+                            current_player += 1
+                            tentative_bet = 0
+
+                            dynamic_elements = []
+                            dynamic_sprites.remove(dynamic_sprites.sprites())
+                        elif i.id == 3:
+                            if game_state.players[current_player].balance > tentative_bet:
+                                tentative_bet += 50
+                            i.tracked_bool = False
+                        elif i.id == 4:
+                            if tentative_bet > 0:
+                                tentative_bet -= 50
+                            i.tracked_bool = False
+
+        elif current_player < game_state.num_players - 1:
+            game_state.select_player_option(current_player, 1, 50)
+            current_player += 1
+        else:
+            game_state.select_player_option(current_player, 2, 50)
+            current_player = 0
+            phase += 1
+
+        update_balance_visuals(static_sprites, game_state, game_state.num_players)
+        tentative_bet_text.remove(tentative_bet_text.sprites())
+        tentative_bet_text.add(
+            element.TextElement(f"${tentative_bet}", 'fonts/CallingCode-Regular.ttf', 28, 1000, 650).sprite)
+
     elif phase == 8:
-        if game_state.players[current_player].aspect == "dealer":
-            game_state.add_bet(50, current_player)
-            phase += 1
-            current_player = 0
-        elif current_player == 0:
-            # placeholder for asking player for bet/fold/check
-            game_state.add_bet(50, current_player)
-            current_player += 1
-        else:
-            # placeholder for pausing for 1 sec, determining hand value, and making decision based on that
-            game_state.add_bet(50, current_player)
-            current_player += 1
-    # Deal the river (one card)
-    elif phase == 9:
         game_state.add_to_river(1)
+        for i in element.create_river_cards(game_state.river, game_state):
+            card_sprites.add(i.sprite)
         phase += 1
-    # Go around with bets
-    elif phase == 10:
-        if game_state.players[current_player].aspect == "dealer":
-            game_state.add_bet(50, current_player)
-            phase += 1
-            current_player = 0
+
+    elif phase == 9:
+        if game_state.players[current_player].folded:
+            if current_player < game_state.num_players - 1:
+                current_player = 0
+                phase += 1
+            else:
+                current_player += 1
         elif current_player == 0:
-            # placeholder for asking player for bet/fold/check
-            game_state.add_bet(50, current_player)
+            if len(dynamic_elements) == 0:
+                for i in element.create_player_option_buttons():
+                    dynamic_elements.append(i)
+                    dynamic_sprites.add(i.sprite)
+            else:
+                for i in dynamic_elements:
+                    if i.tracked_bool:
+                        if i.id <= 2:
+                            game_state.select_player_option(current_player, i.id, tentative_bet)
+                            current_player += 1
+                            tentative_bet = 0
+
+                            dynamic_elements = []
+                            dynamic_sprites.remove(dynamic_sprites.sprites())
+                        elif i.id == 3:
+                            if game_state.players[current_player].balance > tentative_bet:
+                                tentative_bet += 50
+                            i.tracked_bool = False
+                        elif i.id == 4:
+                            if tentative_bet > 0:
+                                tentative_bet -= 50
+                            i.tracked_bool = False
+
+        elif current_player < game_state.num_players - 1:
+            game_state.select_player_option(current_player, 1, 50)
             current_player += 1
         else:
-            # placeholder for pausing for 1 sec, determining hand value, and making decision based on that
-            game_state.add_bet(50, current_player)
-            current_player += 1
-    # Determine winner and distribute pot
+            game_state.select_player_option(current_player, 2, 50)
+            current_player = 0
+            phase += 1
+
+        update_balance_visuals(static_sprites, game_state, game_state.num_players)
+        tentative_bet_text.remove(tentative_bet_text.sprites())
+        tentative_bet_text.add(
+            element.TextElement(f"${tentative_bet}", 'fonts/CallingCode-Regular.ttf', 28, 1000, 650).sprite)
+
+    elif phase == 10:
+        game_state.add_to_river(1)
+        for i in element.create_river_cards(game_state.river, game_state):
+            card_sprites.add(i.sprite)
+        phase += 1
+
     elif phase == 11:
+        if game_state.players[current_player].folded:
+            if current_player < game_state.num_players - 1:
+                current_player = 0
+                phase += 1
+            else:
+                current_player += 1
+        elif current_player == 0:
+            if len(dynamic_elements) == 0:
+                for i in element.create_player_option_buttons():
+                    dynamic_elements.append(i)
+                    dynamic_sprites.add(i.sprite)
+            else:
+                for i in dynamic_elements:
+                    if i.tracked_bool:
+                        if i.id <= 2:
+                            game_state.select_player_option(current_player, i.id, tentative_bet)
+                            current_player += 1
+                            tentative_bet = 0
+
+                            dynamic_elements = []
+                            dynamic_sprites.remove(dynamic_sprites.sprites())
+                        elif i.id == 3:
+                            if game_state.players[current_player].balance > tentative_bet:
+                                tentative_bet += 50
+                            i.tracked_bool = False
+                        elif i.id == 4:
+                            if tentative_bet > 0:
+                                tentative_bet -= 50
+                            i.tracked_bool = False
+
+        elif current_player < game_state.num_players - 1:
+            game_state.select_player_option(current_player, 1, 50)
+            current_player += 1
+        else:
+            game_state.select_player_option(current_player, 2, 50)
+            current_player = 0
+            phase += 1
+
+        update_balance_visuals(static_sprites, game_state, game_state.num_players)
+        tentative_bet_text.remove(tentative_bet_text.sprites())
+        tentative_bet_text.add(
+            element.TextElement(f"${tentative_bet}", 'fonts/CallingCode-Regular.ttf', 28, 1000, 650).sprite)
+
+    # Determine winner and distribute pot
+    elif phase == 12:
         game_state.determine_winner()
-        # running = False
+        game_state.new_round_reset()
+        update_balance_visuals(static_sprites, game_state, game_state.num_players)
+        card_sprites.remove(card_sprites.sprites())
+        phase = 3
 
     # draw the sprites to the window
     static_sprites.draw(screen)
     dynamic_sprites.draw(screen)
+    card_sprites.draw(screen)
+    tentative_bet_text.draw(screen)
 
     # update the screen
     pygame.display.update()
